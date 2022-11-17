@@ -5,6 +5,7 @@
 #include <time.h>
 
 #define EXPONENT 2.71828182846
+#define SPEED_LEARNING 0.0001;
 
 using namespace std;
 
@@ -16,6 +17,7 @@ double sigma(double value)
 struct network
 {
 	vector<vector<double>> value;
+	vector<vector<double>> delta;
 
 	vector<vector<vector<double>>> w;
 
@@ -28,11 +30,16 @@ struct network
 			for (int j = 0; j < v[i]; ++j)
 				value[i].push_back(0);
 
+		delta.resize(v.size());
+		for (int i = 0; i < v.size(); ++i)
+			for (int j = 0; j < v[i]; ++j)
+				delta[i].push_back(0);
+
 		bias.resize(v.size());
 		for (int i = 0; i < v.size(); ++i)
 			for (int j = 0; j < v[i]; ++j)
 				if (i != 0)
-					bias[i].push_back(rand() % 21 - 10);
+					bias[i].push_back(0);
 				else
 					bias[i].push_back(0);
 
@@ -43,7 +50,7 @@ struct network
 			if (i != v.size() - 1)
 				for (int j = 0; j < v[i]; ++j)
 					for (int k = 0; k < v[i + 1]; ++k)
-						w[i][j].push_back(rand() % 21 - 10);
+						w[i][j].push_back(0);
 		}
 
 	}
@@ -83,6 +90,23 @@ struct network
 		cout << endl;
 		cout << "}   <---- This my network ^_^";
 		cout << endl;
+	}
+
+	void print_answer()
+	{
+		cout << "Answer = [";
+
+		for (int i = 0; i < value.back().size(); ++i)
+		{
+			if (i == value.back().size() - 1)
+				cout << value.back()[i];
+			else
+				cout << value.back()[i] << ", ";
+		}
+
+		cout << "]" << endl;
+
+		return;
 	}
 
 	void calculate_neuron(int x, int y)
@@ -126,6 +150,19 @@ struct network
 
 		return;
 	}
+	void setAnswer(vector<double> v)
+	{
+		if (v.size() != delta.back().size())
+		{
+			cout << "ALARM!!! OUT OF RANGE ANSWER -_-" << endl;
+			return;
+		}
+
+		for (int i = 0; i < v.size(); ++i)
+		{
+			delta.back()[i] = value.back()[i] - v[i];
+		}
+	}
 
 	vector<double> getAnswer()
 	{
@@ -146,6 +183,54 @@ struct network
 
 		return;
 	}
+
+	void clear_delta()
+	{
+		for (int i = 0; i < delta.size(); ++i)
+			for (int j = 0; j < delta[i].size(); ++j)
+				delta[i][j] = 0;
+	}
+
+	void update_neuron(int x, int y)
+	{
+		if (x == 0)
+			return;
+
+		for (int i = 0; i < w[x - 1].size(); ++i)
+		{
+			delta[x - 1][i] -= w[x - 1][i][y] * delta[x][y] * SPEED_LEARNING;
+			w[x - 1][i][y] -= value[x - 1][i] * delta[x][y] * SPEED_LEARNING;
+		}
+
+		bias[x][y] -= delta[x][y] * SPEED_LEARNING;
+
+		return;
+	}
+	void update_line(int x)
+	{
+		for (int i = 0; i < value[x].size(); ++i)
+			update_neuron(x, i);
+
+		return;
+	}
+	void update_network()
+	{
+		//clear_delta();
+
+		for (int i = value.size() - 1; i > 0; --i)
+			update_line(i);
+
+		return;
+	}
+
+	void learn(vector<double> v, vector<double> ans)
+	{
+		function(v);
+		clear_delta();
+		setAnswer(ans);
+		update_network();
+	}
+
 };
 
 
@@ -155,10 +240,40 @@ int main()
 	cout.precision(2);
 	srand(time(NULL));
 	//vector <int> v { 5, 5, 2 };
-	network da({ 784, 16, 10, 10 });
-	da.generateRandomInput();
-	da.calculate_network();
-	da.print_network();
+
+	network ns({ 5,  1 });
+
+	ns.print_network();
+
+	for (int i = 0; i < 300; ++i) {
+		int ans = 0;
+		vector<double> vec;
+		for (int j = 0; j < 5; ++j)
+		{
+			vec.push_back(rand() % 21 - 10);
+			cout << vec.back() << " ";
+			ans += vec.back() * j;
+		}
+		for (int k = 0; k < 10; ++k) {
+			cout << " ------>  " << ans << " | ";
+			ns.learn(vec, { double(ans) });
+			ns.print_answer();
+		}
+	}
+
+	ns.print_network();
+
+	while (true)
+	{
+		vector<double> vec(5);
+		for (int j = 0; j < 5; ++j)
+			cin >> vec[j];
+		ns.function(vec);
+		ns.print_answer();
+	}
+
+	//ns.print_network();
+
 	cout << "da TbI horosh!";
 	return 0;
 }
