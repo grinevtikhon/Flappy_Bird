@@ -32,26 +32,37 @@ const bool otladka = false;
 
 
 // 1280 * 720
-vector<int> sloi{ 5,  1 };
+vector<int> sloi{ 6,6,  1 };
 
-int group_size = 1000;
-int nnn = 1;
+int group_size = 300;
+int nnn = 25;
 
-Generation gen(sloi, group_size, nnn, 1000); // vector<int> _v, int _group_size, int _n, double _dispersion
+Generation gen(sloi, group_size, nnn, 10); // vector<int> _v, int _group_size, int _n, double _dispersion
 
 vector<Flappy_bird> bird(group_size * nnn);
 
+//Flappy_bird tester;
+
 Barriers enemy;
+
+
 
 void next_tick() {
 
 	enemy.next_tick();
 
+	//tester.next_tick();
+	//tester.check_bird_with_barriers(enemy);
+	//tester.update_information(enemy);
+
 	for (int i = 0; i < bird.size(); ++i)
 	{
-		bird[i].next_tick();
-		bird[i].check_bird_with_barriers(enemy);
-		bird[i].update_information(enemy);
+		if (bird[i].alive)
+		{
+			bird[i].next_tick();
+			bird[i].check_bird_with_barriers(enemy);
+			bird[i].update_information(enemy);
+		}
 	}
 	return;
 }
@@ -75,6 +86,8 @@ void restart() {
 
 	bird[0].color = sf::Color::White;
 
+	//tester.reset();
+
 	enemy.start_pipes();
 
 	cout << -gen.best_mistake << endl << endl;
@@ -85,6 +98,9 @@ void restart() {
 
 int main()
 {
+
+	//tick = 0.05;
+
 	cout.setf(ios::fixed);
 	cout.precision(2);
 	srand(time(NULL));
@@ -153,13 +169,24 @@ int main()
 		//cout << endl;
 		//cout << anyboody_alive << endl;
 
+		int codttt = 0;
+
 		for (int i = bird.size() - 1; i >= 0; --i)
 		{
 			if (bird[i].alive)
+			{
 				bird[i].draw(window);
+				++codttt;
+				if (codttt > 50)
+					break;
+			}
 		}
 		//bird[0].draw(window);
 
+		//if (anyboody_alive < 10)
+		//{
+		//	tick = 0.005;
+		//}
 
 		if (anyboody_alive == 0)
 			restart();

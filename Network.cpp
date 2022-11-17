@@ -161,28 +161,18 @@ void Network::mutate(Network& _n, double _dispersion)
 		for (int j = 0; j < _n.w[i].size(); ++j)
 			for (int k = 0; k < _n.w[i][j].size(); ++k)
 			{
-				double buf = (rand() % 4000 - 2000.0) / 1000.0;
-				if (abs(buf) > 1)
-				{
-					_n.w[i][j][k] = w[i][j][k] / (buf / 2 * _dispersion);
-				}
-				else {
-					_n.w[i][j][k] = w[i][j][k] * buf * _dispersion;
-				}
+				double buf = (rand() % 40000 - 20000.0) / 20000.0;
+				_n.w[i][j][k] = w[i][j][k] + buf * _dispersion;
+
 			}
 
 
 	for (int i = 0; i < _n.bias.size(); ++i)
 		for (int j = 0; j < _n.bias[i].size(); ++j)
 		{
-			double buf = (rand() % 4000 - 2000.0) / 1000.0;
-			if (abs(buf) > 1)
-			{
-				_n.bias[i][j] = bias[i][j] / (buf / 2 * _dispersion);
-			}
-			else {
-				_n.bias[i][j] = bias[i][j] * buf * _dispersion;
-			}
+			double buf = (rand() % 40000 - 20000.0) / 20000.0;
+
+			_n.bias[i][j] = bias[i][j] + buf * _dispersion;
 		}
 
 	return;

@@ -40,7 +40,7 @@ void Barriers::update_pipes()
 		if (pipes[first_element].first.x2 > -horizontal_distance)
 			break;
 
-		int x = max(pipes[((first_element - 1) % amount + amount) % amount].first.x2 + horizontal_distance, 1.5 * Length);
+		int x = max(pipes[((first_element - 1) % amount + amount) % amount].first.x2 + horizontal_distance, 0.9 * Length);
 		int y = rand() % (Height - 2 * min_dist) + min_dist;
 
 		pipes[first_element].first.set_position(x, 0, y - vertical_distance / 2);

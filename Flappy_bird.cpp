@@ -9,7 +9,7 @@ Flappy_bird::Flappy_bird()
 	y_to_roof_pipe = 0;
 	y_to_floor_pipe = 0;
 
-	information.resize(5, 0.0);
+	information.resize(6, 0.0);
 
 	r = 27;
 	v_x = 0;
@@ -30,7 +30,10 @@ void Flappy_bird::reset()
 	x = Length / 2;
 	y = Height / 2;
 	alive = true;
-	color = sf::Color::Yellow;
+	int color_r = rand() % 256;
+	int color_g = rand() % 256;
+	int color_b = rand() % 256;
+	color = sf::Color(color_r, color_g, color_b);
 
 	score = 0;
 
@@ -247,8 +250,8 @@ void Flappy_bird::update_y_to_floor_pipe(Barriers& _bar)
 
 void Flappy_bird::update_information(Barriers& _bar)
 {
-	if (information.size() != 5)
-		information.resize(5);
+	if (information.size() != 6)
+		information.resize(6);
 
 	update_between_roof();
 	update_between_floor();
@@ -261,5 +264,6 @@ void Flappy_bird::update_information(Barriers& _bar)
 	information[2] = x_to_pipe;
 	information[3] = y_to_roof_pipe;
 	information[4] = y_to_floor_pipe;
+	information[5] = v_y;
 
 }
