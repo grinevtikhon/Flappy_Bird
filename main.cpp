@@ -1,340 +1,164 @@
-﻿#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-#include <iostream>
+﻿#include <iostream>
+#include <vector>
 #include <cmath>
 #include <algorithm>
-#include <queue>
-#include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
+
+#define EXPONENT 2.71828182846
 
 using namespace std;
 
-const bool otladka = false;
-//////////////////////////
-const int Height = 720;
-const int Length = 1080;
-const int high_grass = 50;
-const int min_dist = 200;
-const double width_pipe = 100;
-const double horizontal_distance = 300;
-const double vertical_distance = 200;
-const double tick = 0.001f;
-const double g = 2400;
-
-
-// 1280 * 720
-
-struct flappy_bird
+double sigma(double value)
 {
-	double r;
-	double v_x, v_y;
-	double x, y;
-	bool dead;
-	sf::Color c;
-	flappy_bird() {
-		r = 27;
-		v_x = 0;
-		v_y = 0;
-		x = Length / 2;
-		y = Height / 2;
-		dead = false;
-		c.Yellow;
+	return 1.0f / (1.0f + pow(EXPONENT, -value));
+}
+
+struct network
+{
+	vector<vector<double>> value;
+
+	vector<vector<vector<double>>> w;
+
+	vector<vector<double>> bias;
+
+	network(vector<int> v)
+	{
+		value.resize(v.size());
+		for (int i = 0; i < v.size(); ++i)
+			for (int j = 0; j < v[i]; ++j)
+				value[i].push_back(0);
+
+		bias.resize(v.size());
+		for (int i = 0; i < v.size(); ++i)
+			for (int j = 0; j < v[i]; ++j)
+				if (i != 0)
+					bias[i].push_back(rand() % 21 - 10);
+				else
+					bias[i].push_back(0);
+
+		w.resize(v.size());
+		for (int i = 0; i < v.size(); ++i)
+		{
+			w[i].resize(v[i]);
+			if (i != v.size() - 1)
+				for (int j = 0; j < v[i]; ++j)
+					for (int k = 0; k < v[i + 1]; ++k)
+						w[i][j].push_back(rand() % 21 - 10);
+		}
+
 	}
-	void reset() {
-		r = 27;
-		v_x = 0;
-		v_y = 0;
-		x = Length / 2;
-		y = Height / 2;
-		dead = false;
-		c = sf::Color::Yellow;
-	}
-	void next_tick() {
-		y = y + v_y * tick + ((g * tick * tick) / 2.0f);
-		v_y = v_y + g * tick;
-		x = x + v_x * tick;
-		if (y > Height - high_grass - r) {
-			v_y = 0;
-			y = Height - high_grass - r;
+
+	void print_neuron(int x, int y)
+	{
+		cout << "Neuron (" << x << ", " << y << ")";
+		cout << " value = " << value[x][y] << " ; ";
+		cout << "weights : [";
+		for (int k = 0; k < w[x][y].size(); ++k)
+		{
+			if (k == w[x][y].size() - 1)
+				cout << w[x][y][k];
+			else
+				cout << w[x][y][k] << ", ";
 		}
-		if (y < 0) {
-			v_y = abs(v_y);
-		}
-		if (x > Length) {
-			v_x = -abs(v_x);
-		}
-		if (x < 0) {
-			v_x = abs(v_x);
-		}
+		cout << "] ;";
+		cout << "\t bias = " << bias[x][y];
+		cout << endl;
+
 		return;
 	}
-	void jump() {
-		if (dead == true && otladka == false) {
+	void print_line(int x)
+	{
+		cout << "Line = " << x << " : (" << endl;
+		for (int i = 0; i < value[x].size(); ++i)
+			print_neuron(x, i);
+		cout << ")" << endl;
+
+		return;
+	}
+	void print_network()
+	{
+		cout << "Network : {" << endl << endl;
+		for (int i = 0; i < value.size(); ++i)
+			print_line(i);
+		cout << endl;
+		cout << "}   <---- This my network ^_^";
+		cout << endl;
+	}
+
+	void calculate_neuron(int x, int y)
+	{
+		value[x][y] = 0;
+		for (int i = 0; i < value[x - 1].size(); ++i) {
+			value[x][y] += value[x - 1][i] * w[x - 1][i][y];
+		}
+		value[x][y] += bias[x][y];
+
+		//value[x][y] = sigma(value[x][y]);
+
+		return;
+	}
+	void calculate_line(int x)
+	{
+		for (int i = 0; i < value[x].size(); ++i)
+			calculate_neuron(x, i);
+
+		return;
+	}
+	void calculate_network()
+	{
+
+		for (int i = 1; i < value.size(); ++i)
+			calculate_line(i);
+
+		return;
+	}
+
+	void setInput(vector<double> v)
+	{
+		if (v.size() != value[0].size())
+		{
+			cout << "ALARM!!! OUT OF RANGE INPUT -_-" << endl;
 			return;
 		}
-		v_y = -700;
+
+		for (int i = 0; i < v.size(); ++i)
+			value[0][i] = v[i];
+
 		return;
 	}
-	void die() {
-		dead = true;
-		c = sf::Color::Red;
+
+	vector<double> getAnswer()
+	{
+		return value.back();
+	}
+
+	vector<double> function(vector<double> v)
+	{
+		setInput(v);
+		calculate_network();
+		return getAnswer();
+	}
+
+	void generateRandomInput()
+	{
+		for (int i = 0; i < value[0].size(); ++i)
+			value[0][i] = rand() % 21 - 10;
+
 		return;
 	}
 };
 
-struct pipe {
-	double x1, y1, x2, y2;
-	double v_x;
-	pipe(double _x1, double _y1, double _y2) {
-		x1 = _x1;
-		x2 = _x1 + width_pipe;
-		y1 = min(_y1, _y2);
-		y2 = max(_y2, _y2);
-		v_x = -300;
-	}
-	void next_tick() {
-		x1 = x1 + v_x * tick;
-		x2 = x1 + width_pipe;
-		return;
-	}
-};
-
-flappy_bird bird;
-queue <pipe> pipes;
-
-bool touch(flappy_bird &b, pipe &p) {
-
-	if (b.x < p.x1) {
-		if (b.y < p.y1) {
-			if ((b.x - p.x1)*(b.x - p.x1) + (b.y - p.y1)*(b.y - p.y1) < b.r * b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		if (p.y1 <= b.y && b.y <= p.y2) {
-			if (p.x1 - b.x < b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		if (p.y2 < b.y) {
-			if ((b.x - p.x1)*(b.x - p.x1) + (b.y - p.y2)*(b.y - p.y2) < b.r * b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	}
-	if (p.x1 <= b.x && b.x <= p.x2) {
-		if (b.y < p.y1) {
-			if (p.y1 - b.y < b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		if (p.y1 <= b.y && b.y <= p.y2) {
-			return true;
-		}
-		if (p.y2 < b.y) {
-			if (b.y - p.y2 < b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	}
-	if (p.x2 < b.x) {
-		if (b.y < p.y1) {
-			if ((b.x - p.x2)*(b.x - p.x2) + (b.y - p.y1)*(b.y - p.y1) < b.r * b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		if (p.y1 <= b.y && b.y <= p.y2) {
-			if (b.x - p.x2 < b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		if (p.y2 < b.y) {
-			if ((b.x - p.x2)*(b.x - p.x2) + (b.y - p.y2)*(b.y - p.y2) < b.r * b.r) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	}
-}
-
-bool bird_vresols() {
-	bool ans = false;
-	for (int i = 0; i < pipes.size(); ++i) {
-		if (ans == false) {
-			if (touch(bird, pipes.front())) {
-				ans = true;
-			}
-		}
-		pipes.push(pipes.front());
-		pipes.pop();
-	}
-	if (bird.y + bird.r >= Height - high_grass) {
-		ans = true;
-	}
-	return ans;
-}
-
-void generate_pipe() {
-	int buf_y = rand() % (Height - 2 * min_dist) + min_dist;
-	if (pipes.empty()) {
-		pipes.push(pipe(Length + 300, 0, buf_y - (vertical_distance / 2)));
-		pipes.push(pipe(Length + 300, buf_y + (vertical_distance / 2), Height));
-	}
-	buf_y = rand() % (Height - 2 * min_dist) + min_dist;
-	if (pipes.back().x2 < Length) {
-		double buf = pipes.back().x2;
-		pipes.push(pipe(buf + horizontal_distance, 0, buf_y - (vertical_distance / 2)));
-		pipes.push(pipe(buf + horizontal_distance, buf_y + (vertical_distance / 2), Height));
-	}
-	return;
-}
-
-void delete_pipe() {
-	if (pipes.empty()) {
-		pipes.push(pipe(Length + 1000, 0, 300));
-		pipes.push(pipe(Length + 1000, 300 + vertical_distance, Height));
-	}
-	if (pipes.front().x2 < 0) {
-		pipes.pop();
-		delete_pipe();
-	}
-	return;
-}
-
-void stop_pipe() {
-	for (int i = 0; i < pipes.size(); ++i) {
-		pipes.front().v_x = 0.0f;
-		pipes.push(pipes.front());
-		pipes.pop();
-	}
-	return;
-}
-
-void next_tick() {
-	bird.next_tick();
-	generate_pipe();
-	delete_pipe();
-	for (int i = 0; i < pipes.size(); ++i) {
-		pipes.front().next_tick();
-		pipes.push(pipes.front());
-		pipes.pop();
-	}
-	if (bird_vresols()) {
-		bird.jump();
-		bird.die();
-	}
-	return;
-}
-
-void restart() {
-	bird.reset();
-	while (!pipes.empty()) {
-		pipes.pop();
-	}
-	return;
-}
 
 int main()
 {
+	cout.setf(ios::fixed);
+	cout.precision(2);
 	srand(time(NULL));
-
-
-
-	sf::RenderWindow window(sf::VideoMode(Length, Height), "SFML works!");
-	sf::CircleShape circle(bird.r);
-	//circle.setTexture(&bird_texture);
-	sf::RectangleShape rectangle;
-	circle.setFillColor(sf::Color::Yellow);
-	rectangle.setFillColor(sf::Color::Green);
-	circle.setFillColor(sf::Color::Yellow);
-	//shape.setFillColor(sf::Color::Green);
-
-	//circle.setTexture(bird_texture);
-
-	bool pr_space = false;
-	bool now_space = false;
-	bool pr_r = false;
-	bool now_r = false;
-
-	while (window.isOpen())
-	{
-		now_space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
-		if (now_space == true && pr_space == false) {
-			bird.jump();
-		}
-		pr_space = now_space;
-
-		now_r = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
-		if (now_r == true && pr_r == false) {
-			restart();
-			circle.setFillColor(sf::Color::Yellow);
-		}
-		pr_r = now_r;
-
-		next_tick();
-
-		if (bird.dead == true) {
-			if (otladka == false) {
-				circle.setFillColor(sf::Color::Red);
-				stop_pipe();
-			}
-		}
-
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				window.close();
-		}
-
-		window.clear(sf::Color::Black);
-
-
-		for (int i = 0; i < pipes.size(); ++i) {
-			rectangle.setPosition(pipes.front().x1, pipes.front().y1);
-			rectangle.setSize(sf::Vector2f(pipes.front().x2 - pipes.front().x1, pipes.front().y2 - pipes.front().y1));
-			window.draw(rectangle);
-			//cout << pipes.front().x1 << " | " << pipes.front().x2 << " | " << pipes.front().y1 << " | " << pipes.front().y2 << endl;
-			pipes.push(pipes.front());
-			pipes.pop();
-		}
-		//cout << pipes.size() << " | " << pipes.back().x2 << " | " << pipes.front().x2 << endl;
-
-		sf::RectangleShape ground;
-		ground.setPosition(0, Height - high_grass);
-		ground.setSize(sf::Vector2f(Length, high_grass));
-		ground.setFillColor(sf::Color(65, 25, 0));
-		window.draw(ground);
-
-		//circle.setFillColor(sf::Color::Yellow);
-		circle.setPosition(bird.x - bird.r, bird.y - bird.r);
-		window.draw(circle);
-
-		window.display();
-	}
-
+	//vector <int> v { 5, 5, 2 };
+	network da({ 784, 16, 10, 10 });
+	da.generateRandomInput();
+	da.calculate_network();
+	da.print_network();
+	cout << "da TbI horosh!";
 	return 0;
 }
