@@ -10,7 +10,7 @@
 #define EXPONENT 2.71828182846
 #define SPEED_LEARNING 0.00001
 #define GRAN_LEARN 0.01
-#define ZOOM 30
+#define ZOOM 10
 #define HEIGHT 800
 #define LENGTH 800
 #define DETALISATION_ANS 200
@@ -24,19 +24,24 @@ using namespace std::chrono; // nanoseconds, system_clock, seconds
 sf::RenderWindow window(sf::VideoMode(LENGTH, HEIGHT), "SFML works!");
 sf::CircleShape shape(1.f);
 
-vector<int> str{ 1, 10, 10, 1 };
+vector<int> str{ 1, 20, 20,  1 };
 vector<long double> parametr;
 vector<long double> ans;
-long double bred = 30;
-int gran_chance = 1;
-int gran_da = 50;
+long double bred = 20;
+int gran_chance = 50;
+int gran_da = 200;
+
+double atalon_function(double x)
+{
+	return pow(x, 3) / 1000.0 + 20;
+}
 
 void calculate_dannue()
 {
-	for (int i = 0; i < 10; ++i)
+	for (int i = -25; i <= 25; ++i)
 		parametr.push_back(i);
 	for (int i = 0; i < parametr.size(); ++i)
-		ans.push_back(sqrt(parametr[i]));
+		ans.push_back(atalon_function(parametr[i]));
 
 }
 
@@ -163,6 +168,15 @@ struct network {
 			shape.setPosition(x * ZOOM + LENGTH / 2 - shape.getRadius() / 2, HEIGHT / 2 - y * ZOOM - shape.getRadius() / 2);
 			window.draw(shape);
 		}
+
+		for (int i = 0; i < parametr.size(); ++i) {
+			function({ parametr[i] });
+			vector <long double> kostul;
+			kostul.push_back(ans[i]);
+			setAnswer(kostul);
+			cout << getMistake() << "    ";
+		}
+		cout << endl;
 
 		//sleep_for(100ms);
 
@@ -297,6 +311,7 @@ struct network {
 		calculate_network();
 		clear_delta();
 		setAnswer(ans);
+		long long kolvo = 0;
 		long long st = 0;
 		// bred = rand() % 200 + 10;
 
@@ -307,6 +322,8 @@ struct network {
 			//cout << "< " << getMistake() << " >" << endl;
 			//if (st % 50000 == 0 && st != 0)
 				//print_network();
+			if (!is_right())
+				++kolvo;
 			++st;
 			update_network();
 			calculate_network();
@@ -316,7 +333,7 @@ struct network {
 			if (st >= bred && chance > gran_chance)
 				break;
 		}
-		return st;
+		return kolvo;
 	}
 
 	long double getMistake()
@@ -352,7 +369,7 @@ int main()
 	calculate_dannue();
 
 	cout.setf(ios::fixed);
-	cout.precision(10);
+	cout.precision(2);
 	srand(time(NULL));
 
 	network diana(str);
@@ -373,11 +390,11 @@ int main()
 		{
 			int buf;
 			buf = diana.learn({ parametr[i] }, { ans[i] });
-			cout << buf << "\t";
+			//cout << buf << "\t";
 			gr += buf;
 			//diana.print_network();
 		}
-		cout << endl;
+		//cout << endl;
 		if (gr <= parametr.size())
 			break;
 		sf::Event event;
