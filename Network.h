@@ -26,11 +26,16 @@ public:
 
 	Network(vector<int> _v);
 
+private:
+
 	void generateRandomW();
 	void generateRandomBias();
 
 	void calculate_neuron(int& _x, int& _y);
 	void calculate_line(int _x);
+
+public:
+
 	void calculate_network();
 
 	void setInput(vector<double> _v);

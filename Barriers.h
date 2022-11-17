@@ -14,6 +14,7 @@
 #include "MyCostants.h"
 
 #include "Pipe.h"
+#include "Scoreboard.h"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ public:
 
 	int first_element;
 
-	vector<pair<Pipe, Pipe>> pipes; 
+	vector<pair<Pipe, Pipe>> pipes;
 
 	Barriers();
 

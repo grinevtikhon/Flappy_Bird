@@ -2,7 +2,7 @@
 
 const double g = 2400;
 
-const double tick = 0.05f;
+const double tick = 0.01f;
 
 const int Height = 720;
 const int Length = 1080;

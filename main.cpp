@@ -1,7 +1,4 @@
-﻿// ��� ��������, ����� ��� �������� � ���� ����
-
-
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -22,11 +19,11 @@
 #include "Flappy_bird.h"
 #include "Pipe.h"
 #include "Barriers.h"
+#include "Scoreboard.h"
 
 
 using namespace std;
 
-//��� ����
 const bool otladka = false;
 //////////////////////////
 
@@ -37,7 +34,7 @@ vector<int> sloi{ 6,6,  1 };
 int group_size = 300;
 int nnn = 25;
 
-Generation gen(sloi, group_size, nnn, 10); // vector<int> _v, int _group_size, int _n, double _dispersion
+Generation gen(sloi, group_size, nnn, 1); // vector<int> _v, int _group_size, int _n, double _dispersion
 
 vector<Flappy_bird> bird(group_size * nnn);
 
@@ -99,26 +96,68 @@ void restart() {
 int main()
 {
 
+
+
+	//sf::RenderWindow window(sf::VideoMode(Length, Height), "SFML works!");
+
+	//sf::Text text;
+
+	//sf::Font font;
+
+	//const string str = "Flappy_bird/resources/Flappy_birdPixeboy.ttf";
+
+	//if (!font.loadFromFile(str))
+	//{
+	//	cout << "PANICAAAA!!!! AAAAAAAAAAAAAA" << endl;
+	//}
+	//text.setFont(font);
+	// set the string to display
+	//text.setString("Hello world");
+
+	// set the character size
+	//text.setCharacterSize(24); // in pixels, not points!
+
+	// set the color
+	//text.setFillColor(sf::Color::Red);
+
+	// set the text style
+	//text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+	//while (window.isOpen())
+	//{
+
+	//	window.clear();
+	//	// inside the main loop, between window.clear() and window.display()
+	//	window.draw(text);
+
+	//	window.display();
+	//}
+
+
+
+
+
+
+	//return 0;
 	//tick = 0.05;
 
 	cout.setf(ios::fixed);
 	cout.precision(2);
 	srand(time(NULL));
 
-	enemy.start_pipes();
-
-
 	sf::RenderWindow window(sf::VideoMode(Length, Height), "SFML works!");
 
-	//���������� ����������(�������)
+
+	enemy.start_pipes();
+
 	bool pr_space = false;
 	bool now_space = false;
 	bool pr_r = false;
 	bool now_r = false;
 
+	int number_geration = 1;
+
 	while (window.isOpen())
 	{
-		// ���������� ������� + ������
 		//now_space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
 		//if (now_space == true && pr_space == false) {
 		//	bird.jump();
@@ -177,7 +216,7 @@ int main()
 			{
 				bird[i].draw(window);
 				++codttt;
-				if (codttt > 50)
+				if (codttt > 300)
 					break;
 			}
 		}
@@ -188,8 +227,15 @@ int main()
 		//	tick = 0.005;
 		//}
 
-		if (anyboody_alive == 0)
+		if (anyboody_alive == 0 || (anyboody_alive < nnn && number_geration % 20 != 0 && number_geration < 15))
+		{
+			cout << "Generation " << number_geration << " : " << '\t';
+			++number_geration;
 			restart();
+
+		}
+
+
 
 		window.display();
 	}
