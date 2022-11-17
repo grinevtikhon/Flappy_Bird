@@ -2,6 +2,15 @@
 
 Flappy_bird::Flappy_bird()
 {
+
+	between_roof = 0;
+	between_floor = 0;
+	x_to_pipe = 0;
+	y_to_roof_pipe = 0;
+	y_to_floor_pipe = 0;
+
+	information.resize(5, 0.0);
+
 	r = 27;
 	v_x = 0;
 	v_y = 0;
@@ -39,6 +48,7 @@ void Flappy_bird::next_tick()
 	}
 	if (y < 0) {
 		v_y = abs(v_y);
+		y = r;
 	}
 	//if (x > Length) {
 	//	v_x = -abs(v_x);
@@ -66,7 +76,7 @@ void Flappy_bird::jump()
 
 void Flappy_bird::die()
 {
-	jump();
+	//jump();
 
 	alive = false;
 
@@ -177,10 +187,79 @@ void Flappy_bird::draw(sf::RenderWindow& _window)
 {
 	sf::CircleShape circle(r);
 
+	circle.setOutlineThickness(2);
+	circle.setOutlineColor(sf::Color(153, 0, 153));
 	circle.setFillColor(color);
 	circle.setPosition(x - r, y - r);
 	_window.draw(circle);
 
 	return;
+
+}
+
+void Flappy_bird::update_between_roof()
+{
+	between_roof = y;
+}
+
+void Flappy_bird::update_between_floor()
+{
+	between_floor = Height - y;
+}
+
+void Flappy_bird::update_x_to_pipe(Barriers &_bar)
+{
+	double ans = 100000;
+	for (int i = 0; i < _bar.pipes.size(); ++i)
+	{
+		if (_bar.pipes[i].first.x2 > x)
+			ans = min(ans, _bar.pipes[i].first.x2 - x);
+	}
+
+	x_to_pipe = ans;
+}
+
+void Flappy_bird::update_y_to_roof_pipe(Barriers& _bar)
+{
+	double ans = 100000;
+	for (int i = 0; i < _bar.pipes.size(); ++i)
+	{
+		if (_bar.pipes[i].first.x2 > x && ans > _bar.pipes[i].first.x2 - x)
+		{
+			ans = _bar.pipes[i].first.x2 - x;
+			y_to_roof_pipe = y - _bar.pipes[i].first.y2;
+		}
+	}
+}
+
+void Flappy_bird::update_y_to_floor_pipe(Barriers& _bar)
+{
+	double ans = 100000;
+	for (int i = 0; i < _bar.pipes.size(); ++i)
+	{
+		if (_bar.pipes[i].first.x2 > x && ans > _bar.pipes[i].first.x2 - x)
+		{
+			ans = _bar.pipes[i].first.x2 - x;
+			y_to_floor_pipe = _bar.pipes[i].second.y1 - y - r;
+		}
+	}
+}
+
+void Flappy_bird::update_information(Barriers& _bar)
+{
+	if (information.size() != 5)
+		information.resize(5);
+
+	update_between_roof();
+	update_between_floor();
+	update_x_to_pipe(_bar);
+	update_y_to_roof_pipe(_bar);
+	update_y_to_floor_pipe(_bar);
+
+	information[0] = between_roof;
+	information[1] = between_floor;
+	information[2] = x_to_pipe;
+	information[3] = y_to_roof_pipe;
+	information[4] = y_to_floor_pipe;
 
 }

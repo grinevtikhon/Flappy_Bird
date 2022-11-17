@@ -10,7 +10,9 @@
 #include <thread>
 #include <SFML/System.hpp>
 #include <queue>
-#include "Pipe.h"
+
+#include "MyCostants.h"
+
 
 using namespace std;
 
@@ -18,12 +20,6 @@ class Pipe
 {
 
 public:
-
-	const double tick = 0.004f;
-
-	const double width_pipe = 100;
-	const double horizontal_distance = 300;
-	const double vertical_distance = 200;
 
 
 	double x1, y1, x2, y2;

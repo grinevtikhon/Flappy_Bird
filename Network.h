@@ -41,6 +41,7 @@ public:
 	void calculate_mistake();
 
 	void clear_mistake();
+	void set_mistake(double _mistake);
 	double get_mistake();
 
 	bool operator<(Network& _n);
@@ -51,7 +52,7 @@ public:
 
 	void mutate(Network& _n, double _dispersion);
 
-	double fuction(double _x);
+	double fuction(vector<double> _x);
 
 	void calculate_mistake_for_dots(vector<double> _dot, vector<double> _ans);
 

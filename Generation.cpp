@@ -2,6 +2,7 @@
 
 Generation::Generation(vector<int> _v, int _group_size, int _n, double _dispersion)
 {
+	best_mistake = 0;
 
 	number_of_generations = _n;
 
@@ -15,13 +16,13 @@ Generation::Generation(vector<int> _v, int _group_size, int _n, double _dispersi
 
 void Generation::calculate_generation()
 {
-	for (int i = 0; i < gen.size(); ++i)
-	{
-		for (int j = 0; j < input.size(); ++j)
-		{
-			gen[i].calculate_mistake_for_dots(input, ans);
-		}
-	}
+	//for (int i = 0; i < gen.size(); ++i)
+	//{
+	//	for (int j = 0; j < input.size(); ++j)
+	//	{
+	//		gen[i].calculate_mistake_for_dots(input, ans);
+	//	}
+	//}
 
 	sort(gen.begin(), gen.end());
 

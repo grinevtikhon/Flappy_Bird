@@ -11,6 +11,9 @@
 #include <SFML/System.hpp>
 #include <queue>
 
+
+#include "MyCostants.h"
+
 #include "Pipe.h"
 #include "Barriers.h"
 
@@ -21,16 +24,6 @@ class Flappy_bird
 
 public:
 
-	const double g = 2400;
-
-	const double tick = 0.004f;
-
-	const int Height = 720;
-	const int Length = 1080;
-
-	const int high_grass = 50;
-
-
 
 	double r;
 	double v_x, v_y;
@@ -39,6 +32,14 @@ public:
 	bool alive;
 
 	double score;
+
+	double between_roof;
+	double between_floor;
+	double x_to_pipe;
+	double y_to_roof_pipe;
+	double y_to_floor_pipe;
+
+	vector<double> information;
 
 	sf::Color color;
 
@@ -57,4 +58,17 @@ public:
 	void check_bird_with_barriers(Barriers _bar);
 
 	void draw(sf::RenderWindow &_window);
+
+	void update_between_roof();
+
+	void update_between_floor();
+
+	void update_x_to_pipe(Barriers &_bar);
+
+	void update_y_to_roof_pipe(Barriers& _bar);
+
+	void update_y_to_floor_pipe(Barriers& _bar);
+
+	void update_information(Barriers& _bar);
+
 };

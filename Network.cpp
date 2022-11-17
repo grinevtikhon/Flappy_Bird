@@ -120,6 +120,11 @@ void Network::clear_mistake()
 	return;
 }
 
+void Network::set_mistake(double _mistake)
+{
+	mistake = _mistake;
+}
+
 double Network::get_mistake()
 {
 	return mistake;
@@ -155,18 +160,37 @@ void Network::mutate(Network& _n, double _dispersion)
 	for (int i = 0; i < _n.w.size(); ++i)
 		for (int j = 0; j < _n.w[i].size(); ++j)
 			for (int k = 0; k < _n.w[i][j].size(); ++k)
-				_n.w[i][j][k] = w[i][j][k] + (rand() % 20000 - 10000.0) / 10000.0 * _dispersion;
+			{
+				double buf = (rand() % 4000 - 2000.0) / 1000.0;
+				if (abs(buf) > 1)
+				{
+					_n.w[i][j][k] = w[i][j][k] / (buf / 2 * _dispersion);
+				}
+				else {
+					_n.w[i][j][k] = w[i][j][k] * buf * _dispersion;
+				}
+			}
+
 
 	for (int i = 0; i < _n.bias.size(); ++i)
 		for (int j = 0; j < _n.bias[i].size(); ++j)
-			_n.bias[i][j] = bias[i][j] + (rand() % 20000 - 10000.0) / 10000.0 * _dispersion;
+		{
+			double buf = (rand() % 4000 - 2000.0) / 1000.0;
+			if (abs(buf) > 1)
+			{
+				_n.bias[i][j] = bias[i][j] / (buf / 2 * _dispersion);
+			}
+			else {
+				_n.bias[i][j] = bias[i][j] * buf * _dispersion;
+			}
+		}
 
 	return;
 }
 
-double Network::fuction(double _x)
+double Network::fuction(vector<double> _x)
 {
-	setInput({ _x });
+	setInput(_x);
 	calculate_network();
 	return getAnswer()[0];
 }

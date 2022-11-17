@@ -13,6 +13,8 @@
 #include <SFML/System.hpp>
 #include <queue>
 
+#include "MyCostants.h"
+
 #include "MyGraphic.h"
 #include "Network.h"
 #include "Generation.h"
@@ -27,53 +29,70 @@ using namespace std;
 //��� ����
 const bool otladka = false;
 //////////////////////////
-const int Height = 720;
-const int Length = 1080;
-const int high_grass = 50;
-const int min_dist = 200;
-const double width_pipe = 100;
-const double horizontal_distance = 300;
-const double vertical_distance = 200;
-const double tick = 0.004f;
-const double g = 2400;
 
 
 // 1280 * 720
+vector<int> sloi{ 5,  1 };
 
-Flappy_bird bird;
+int group_size = 1000;
+int nnn = 1;
+
+Generation gen(sloi, group_size, nnn, 1000); // vector<int> _v, int _group_size, int _n, double _dispersion
+
+vector<Flappy_bird> bird(group_size * nnn);
 
 Barriers enemy;
 
 void next_tick() {
-	bird.next_tick();
+
 	enemy.next_tick();
 
-	bird.check_bird_with_barriers(enemy);
-
+	for (int i = 0; i < bird.size(); ++i)
+	{
+		bird[i].next_tick();
+		bird[i].check_bird_with_barriers(enemy);
+		bird[i].update_information(enemy);
+	}
 	return;
 }
 
 void restart() {
-	bird.reset();
+
+	for (int i = 0; i < bird.size(); ++i)
+	{
+		gen.gen[i].set_mistake(-bird[i].score);
+		//cout << gen.gen[i].mistake << " ";
+	}
+
+	//cout << endl;
+
+	gen.calculate_generation();
+	gen.generate_next_generation();
+
+	for (int i = 0; i < bird.size(); ++i)
+		bird[i].reset();
 	enemy.reset();
+
+	bird[0].color = sf::Color::White;
+
 	enemy.start_pipes();
+
+	cout << -gen.best_mistake << endl << endl;
+
 
 	return;
 }
 
 int main()
 {
+	cout.setf(ios::fixed);
+	cout.precision(2);
 	srand(time(NULL));
 
 	enemy.start_pipes();
 
 
 	sf::RenderWindow window(sf::VideoMode(Length, Height), "SFML works!");
-	sf::CircleShape circle(bird.r);
-
-	sf::RectangleShape rectangle;
-	circle.setFillColor(sf::Color::Yellow);
-	rectangle.setFillColor(sf::Color::Green);
 
 	//���������� ����������(�������)
 	bool pr_space = false;
@@ -84,19 +103,20 @@ int main()
 	while (window.isOpen())
 	{
 		// ���������� ������� + ������
-		now_space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
-		if (now_space == true && pr_space == false) {
-			bird.jump();
-		}
-		pr_space = now_space;
+		//now_space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+		//if (now_space == true && pr_space == false) {
+		//	bird.jump();
+		//}
+		//pr_space = now_space;
 
-		now_r = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
-		if (now_r == true && pr_r == false) {
-			restart();
-		}
-		pr_r = now_r;
+		//now_r = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
+		//if (now_r == true && pr_r == false) {
+		//	restart();
+		//}
+		//pr_r = now_r;
 
 		next_tick();
+
 
 
 		sf::Event event;
@@ -110,22 +130,39 @@ int main()
 		window.clear(sf::Color::Black);
 
 
+		int anyboody_alive = 0;
+
+		for (int i = 0; i < bird.size(); ++i)
+		{
+			if (bird[i].alive == false)
+				continue;
+
+			++anyboody_alive;
+
+			double prigat = gen.gen[i].fuction(bird[i].information);
+
+			if (prigat > 0)
+				bird[i].jump();
+
+		}
+
 		enemy.draw_all(window);
 
-		bird.draw(window);
+		//for (int i = 2; i < bird[0].information.size(); ++i)
+		//	cout << bird[0].information[i] << " ";
+		//cout << endl;
+		//cout << anyboody_alive << endl;
 
-		//for (int i = 0; i < enemy.pipes.size(); ++i)
-		//{
-		//	if (abs(enemy.pipes[i].first.x1 - enemy.pipes[i].second.x1) < 1) {
-		//		cout << "ALAARM !!!!!";
-		//	}
-		//	if (abs(enemy.pipes[i].first.x2 - enemy.pipes[i].second.x2) < 1) {
-		//		cout << "ALAARM &&&&&&&";
-		//	}
-		//	cout << enemy.pipes[i].first.x1 << " ";
-		//}
+		for (int i = bird.size() - 1; i >= 0; --i)
+		{
+			if (bird[i].alive)
+				bird[i].draw(window);
+		}
+		//bird[0].draw(window);
 
-		//cout << "SCORE:\t" << bird.score << endl;
+
+		if (anyboody_alive == 0)
+			restart();
 
 		window.display();
 	}

@@ -90,7 +90,7 @@ void MyGraphic::draw_function(Network& _n, double _thickness, double _accuracy, 
 		double l = -double(windowLength) / (zoomX * 2.0);
 		double r = double(windowLength) / (zoomX * 2.0);
 		double x = l + i * (r - l) / (_accuracy * windowLength);
-		double y = _n.fuction(x);
+		double y = _n.fuction({ x });
 		draw_dot(x, y, _thickness, _c);
 	}
 
