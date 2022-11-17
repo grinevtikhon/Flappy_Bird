@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <time.h>
 #include <SFML/Graphics.hpp>
 #include <chrono>
@@ -23,6 +24,8 @@ public:
 	int number_of_generations;
 
 	double dispersion;
+
+	double best_mistake;
 
 	vector<double> input;
 

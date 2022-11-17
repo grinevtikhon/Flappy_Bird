@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <time.h>
 #include <SFML/Graphics.hpp>
 #include <chrono>
@@ -21,9 +22,11 @@ public:
 	double zoomX;
 	double zoomY;
 
+	string name;
+
 	sf::RenderWindow window;
 
-	MyGraphic();
+	MyGraphic(string _name);
 
 	void create_window();
 

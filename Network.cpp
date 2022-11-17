@@ -108,7 +108,7 @@ void Network::calculate_mistake()
 	//mistake = 0;
 
 	for (int i = 0; i < ans.size(); ++i)
-		mistake += abs(value.back()[i] - ans[i]);
+		mistake += pow(value.back()[i] - ans[i], 2);
 
 	return;
 }

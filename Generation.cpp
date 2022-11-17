@@ -25,6 +25,8 @@ void Generation::calculate_generation()
 
 	sort(gen.begin(), gen.end());
 
+	best_mistake = gen[0].get_mistake();
+
 	return;
 }
 

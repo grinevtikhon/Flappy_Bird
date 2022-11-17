@@ -1,9 +1,11 @@
 #include "MyGraphic.h"
 
-MyGraphic::MyGraphic()
+MyGraphic::MyGraphic(string _name)
 {
-	windowHeight = 720;
-	windowLength = 1280;
+	name = _name;
+
+	windowHeight = 600;
+	windowLength = 600;
 
 	zoomX = 1;
 	zoomY = 1;
@@ -14,7 +16,7 @@ MyGraphic::MyGraphic()
 
 void MyGraphic::create_window()
 {
-	window.create(sf::VideoMode(windowLength, windowHeight), "My Graphic aboba");
+	window.create(sf::VideoMode(windowLength, windowHeight), name);
 }
 
 void MyGraphic::set_zoomX(double _zoomX) {

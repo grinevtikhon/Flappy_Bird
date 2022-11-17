@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <time.h>
+#include <string>
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <thread>
