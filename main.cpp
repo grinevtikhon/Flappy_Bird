@@ -9,11 +9,12 @@
 
 #define EXPONENT 2.71828182846
 #define SPEED_LEARNING 0.00001
-#define GRAN_LEARN 1
-#define ZOOM 5
+#define GRAN_LEARN 0.01
+#define ZOOM 30
 #define HEIGHT 800
 #define LENGTH 800
-
+#define DETALISATION_ANS 200
+#define DETALISATION_DEBUG 1
 
 using namespace std;
 using namespace std::this_thread; // sleep_for, sleep_until
@@ -24,11 +25,20 @@ sf::RenderWindow window(sf::VideoMode(LENGTH, HEIGHT), "SFML works!");
 sf::CircleShape shape(1.f);
 
 vector<int> str{ 1, 10, 10, 1 };
-vector<long double> parametr{ 1, 5, 10, 30 };
-vector<long double> ans{ 1, 23.9, 5, 30 };
-long double bred = 15;
+vector<long double> parametr;
+vector<long double> ans;
+long double bred = 30;
 int gran_chance = 1;
-int gran_da = 20;
+int gran_da = 50;
+
+void calculate_dannue()
+{
+	for (int i = 0; i < 10; ++i)
+		parametr.push_back(i);
+	for (int i = 0; i < parametr.size(); ++i)
+		ans.push_back(sqrt(parametr[i]));
+
+}
 
 long double fun(long double x)
 {
@@ -132,12 +142,12 @@ struct network {
 
 		window.clear();
 
-		shape.setRadius(2);
+		shape.setRadius(1);
 		shape.setFillColor(sf::Color::Green);
 
-		for (long double i = 0; i < LENGTH; i += 1)
+		for (long double i = 0; i < LENGTH * DETALISATION_DEBUG; i += 1)
 		{
-			long double x = (i - LENGTH / 2) / ZOOM;
+			long double x = (i - LENGTH * DETALISATION_DEBUG / 2) / ZOOM / DETALISATION_DEBUG;
 			long double y = function({ x })[0];
 			shape.setPosition(x * ZOOM + LENGTH / 2, HEIGHT / 2 - y * ZOOM);
 			window.draw(shape);
@@ -339,7 +349,7 @@ struct network {
 int main()
 {
 
-
+	calculate_dannue();
 
 	cout.setf(ios::fixed);
 	cout.precision(10);
@@ -387,9 +397,9 @@ int main()
 	shape.setRadius(1);
 	shape.setFillColor(sf::Color::Blue);
 
-	for (long double i = 0; i < LENGTH; i += 1)
+	for (long double i = 0; i < LENGTH * DETALISATION_ANS; i += 1)
 	{
-		long double x = (i - LENGTH / 2) / ZOOM;
+		long double x = (i - LENGTH * DETALISATION_ANS / 2) / ZOOM / DETALISATION_ANS;
 		long double y = diana.function({ x })[0];
 		shape.setPosition(x * ZOOM + LENGTH / 2, HEIGHT / 2 - y * ZOOM);
 		window.draw(shape);
